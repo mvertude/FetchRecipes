@@ -24,11 +24,21 @@ struct ContentView: View {
             List {
                 ForEach(recipes, id: \.self) { recipe in
                     HStack {
+                        AsyncImage(url: URL(string: recipe.strMealThumb)) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .cornerRadius(10)
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        .frame(width: 150, height: 150)
                         Text(recipe.strMeal)
                     }
                 }
             }
         }
+        .navigationTitle("Desserts")
         .task {
             await fetch()
         }
