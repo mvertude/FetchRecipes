@@ -7,15 +7,45 @@
 
 import SwiftUI
 
+struct Recipes: Codable {
+    var recipes: [Recipe]
+}
+
+struct Recipe: Hashable, Codable {
+    var strMeal: String
+    var strMealThumb: String
+    var idMeal: String
+}
+
 struct ContentView: View {
+    @State private var recipes = [Recipe]()
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, Fetch!")
+        NavigationView {
+            List {
+                ForEach(recipes, id: \.self) { recipe in
+                    HStack {
+                        Text(recipe.strMeal)
+                    }
+                }
+            }
         }
-        .padding()
+        .task {
+            await fetch()
+        }
+    }
+    
+    func fetch() async {
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else {
+            return
+        }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let decodedResponse = try? JSONDecoder().decode([String: [Recipe]].self, from: data) {
+                recipes = decodedResponse["meals"]!
+            }
+        } catch {
+            print("ERROR: ", error)
+        }
     }
 }
 
