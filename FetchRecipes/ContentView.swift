@@ -12,9 +12,9 @@ struct Recipes: Codable {
 }
 
 struct Recipe: Hashable, Codable {
-    var mealName: String
-    var mealImage: String
-    var mealID: String
+    var strMeal: String
+    var strMealThumb: String
+    var idMeal: String
 }
 
 struct ContentView: View {
@@ -24,9 +24,8 @@ struct ContentView: View {
             List {
                 ForEach(recipes, id: \.self) { recipe in
                     HStack {
-                        Text(recipe.mealName)
+                        Text(recipe.strMeal)
                     }
-                    
                 }
             }
         }
