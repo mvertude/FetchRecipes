@@ -9,9 +9,7 @@ import SwiftUI
 
 struct Recipe: Codable {
     var instructions: [String] = []
-    var ingredients: [String] = []
-    var measurements: [String] = []
-    var ingredientsToMeasurements: [String:String] = [:]
+    var ingredientsAndMeasurements: [String] = []
 }
 
 struct DetailView: View {
@@ -24,48 +22,49 @@ struct DetailView: View {
                     image
                         .resizable()
                         .scaledToFit()
-//                        .cornerRadius(10)
+                        .cornerRadius(10)
                 } placeholder: {
                     ProgressView()
                 }
-                Group {
-                    // Displays cooking instructions
-                    Section {
+            
+                // Displays cooking instructions
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
                         ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
-                            if content != "" {
-                                Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
-                                    .padding([.bottom], 1)
-                            }
+                            Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                    } header: {
-                        Text("Instructions")
-                            .font(.title)
                     }
-                    
-                    // Display ingredients and their measurements
-                    Section {
-                        ForEach(Array(recipe.ingredientsToMeasurements.keys), id: \.self) { key in
-                            HStack {
-                                Text(recipe.ingredientsToMeasurements[key]!)
-                                
-                            }
-                        }
-                    } header: {
-                        Text("Ingredients")
-                            .font(.title)
-                            
-                    }
+                } header: {
+                    Text("Instructions")
+                        .font(.title)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
+                
+                // Display ingredients and their measurements
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
+                            Text("• " + ingr)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                } header: {
+                    Text("Ingredients")
+                        .font(.title)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top)
+                        
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
         }
         .navigationTitle(dessert.strMeal)
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await fetch()
         }
-        
     }
     
     func fetch() async {
@@ -81,14 +80,14 @@ struct DetailView: View {
                 recipe.instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "[0-9]\\. ", with: " ", options: .regularExpression).components(separatedBy: ". ")/*.filter({$0 != ""})*/.map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}
                 
                 // Accesses values by ingredient keys, sorting them by their ending number, ignoring invalid values
-                recipe.ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!})
+                let ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!})
                 
                 // Accesses values by measurement keys, sorting them by their ending number, ignoring invalid values
-                recipe.measurements = dict.filter({$0.key.hasPrefix("strMeasure") && $0.value != " " && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(10))! < Int($1.key.dropFirst(10))!}).map({$0.value!})
+                let measurements = dict.filter({$0.key.hasPrefix("strMeasure") && $0.value != " " && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(10))! < Int($1.key.dropFirst(10))!}).map({$0.value!})
                 
-                // Maps ingredient values to their corresponding measurements
-                for i in 0..<recipe.ingredients.count {
-                    recipe.ingredientsToMeasurements["item" + String(i + 1)] = recipe.measurements[i].trimmingCharacters(in: .whitespaces) + " " + recipe.ingredients[i].trimmingCharacters(in: .whitespaces)
+                // Adds ingredients and measurements together into a single string
+                for i in 0..<ingredients.count {
+                    recipe.ingredientsAndMeasurements.append(measurements[i].trimmingCharacters(in: .whitespaces) + " " + ingredients[i].trimmingCharacters(in: .whitespaces))
                 }
             }
         } catch {
