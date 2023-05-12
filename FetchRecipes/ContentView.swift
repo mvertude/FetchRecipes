@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-struct Recipes: Codable {
-    var recipes: [Recipe]
-}
-
 struct Recipe: Hashable, Codable {
     var strMeal: String
     var strMealThumb: String
@@ -22,7 +18,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(recipes, id: \.self) { recipe in
+                ForEach(recipes.sorted(by: { $0.strMeal < $1.strMeal}) , id: \.self) { recipe in
                     HStack {
                         AsyncImage(url: URL(string: recipe.strMealThumb)) { image in
                             image
@@ -33,7 +29,10 @@ struct ContentView: View {
                             ProgressView()
                         }
                         .frame(width: 150, height: 150)
-                        Text(recipe.strMeal)
+                        VStack {
+                            Text(recipe.strMeal)
+                            Text(recipe.idMeal)
+                        }
                     }
                 }
             }
@@ -54,7 +53,7 @@ struct ContentView: View {
                 recipes = decodedResponse["meals"]!
             }
         } catch {
-            print("ERROR: ", error)
+            print(error)
         }
     }
 }
