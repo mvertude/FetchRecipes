@@ -11,6 +11,7 @@
 		582571B32A0D5805001EE25B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582571B22A0D5805001EE25B /* ContentView.swift */; };
 		582571B52A0D5806001EE25B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 582571B42A0D5806001EE25B /* Assets.xcassets */; };
 		582571B82A0D5806001EE25B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 582571B72A0D5806001EE25B /* Preview Assets.xcassets */; };
+		585BF4DB2A0DC0B700BAB88B /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 585BF4DA2A0DC0B700BAB88B /* DetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +20,7 @@
 		582571B22A0D5805001EE25B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		582571B42A0D5806001EE25B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		582571B72A0D5806001EE25B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		585BF4DA2A0DC0B700BAB88B /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +54,7 @@
 			isa = PBXGroup;
 			children = (
 				582571B02A0D5805001EE25B /* FetchRecipesApp.swift */,
+				585BF4DA2A0DC0B700BAB88B /* DetailView.swift */,
 				582571B22A0D5805001EE25B /* ContentView.swift */,
 				582571B42A0D5806001EE25B /* Assets.xcassets */,
 				582571B62A0D5806001EE25B /* Preview Content */,
@@ -138,6 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				582571B32A0D5805001EE25B /* ContentView.swift in Sources */,
+				585BF4DB2A0DC0B700BAB88B /* DetailView.swift in Sources */,
 				582571B12A0D5805001EE25B /* FetchRecipesApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

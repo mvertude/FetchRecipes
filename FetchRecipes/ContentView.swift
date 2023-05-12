@@ -7,20 +7,20 @@
 
 import SwiftUI
 
-struct Recipe: Hashable, Codable {
+struct Dessert: Hashable, Codable {
     var strMeal: String
     var strMealThumb: String
     var idMeal: String
 }
 
 struct ContentView: View {
-    @State private var recipes = [Recipe]()
+    @State private var recipes = [Dessert]()
     var body: some View {
         NavigationView {
             List {
                 ForEach(recipes.sorted(by: { $0.strMeal < $1.strMeal}) , id: \.self) { recipe in
                     NavigationLink {
-                        Text("TO DO")
+                        DetailView(dessert: recipe)
                     } label: {
                         HStack {
                             AsyncImage(url: URL(string: recipe.strMealThumb)) { image in
@@ -31,7 +31,7 @@ struct ContentView: View {
                             } placeholder: {
                                 ProgressView()
                             }
-                            .frame(width: 150, height: 150)
+                            .frame(width: 120, height: 120)
                             VStack {
                                 Text(recipe.strMeal)
                                 Text(recipe.idMeal)
@@ -42,7 +42,6 @@ struct ContentView: View {
             }
             .navigationTitle("Desserts")
         }
-        
         .task {
             await fetch()
         }
@@ -54,7 +53,7 @@ struct ContentView: View {
         }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            if let decodedResponse = try? JSONDecoder().decode([String: [Recipe]].self, from: data) {
+            if let decodedResponse = try? JSONDecoder().decode([String: [Dessert]].self, from: data) {
                 recipes = decodedResponse["meals"]!
             }
         } catch {
