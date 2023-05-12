@@ -19,25 +19,30 @@ struct ContentView: View {
         NavigationView {
             List {
                 ForEach(recipes.sorted(by: { $0.strMeal < $1.strMeal}) , id: \.self) { recipe in
-                    HStack {
-                        AsyncImage(url: URL(string: recipe.strMealThumb)) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .cornerRadius(10)
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(width: 150, height: 150)
-                        VStack {
-                            Text(recipe.strMeal)
-                            Text(recipe.idMeal)
+                    NavigationLink {
+                        Text("TO DO")
+                    } label: {
+                        HStack {
+                            AsyncImage(url: URL(string: recipe.strMealThumb)) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .cornerRadius(10)
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 150, height: 150)
+                            VStack {
+                                Text(recipe.strMeal)
+                                Text(recipe.idMeal)
+                            }
                         }
                     }
                 }
             }
+            .navigationTitle("Desserts")
         }
-        .navigationTitle("Desserts")
+        
         .task {
             await fetch()
         }
