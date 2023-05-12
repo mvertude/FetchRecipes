@@ -33,8 +33,12 @@ struct DetailView: View {
                         ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
                             Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
                                 .fixedSize(horizontal: false, vertical: true)
+                                .foregroundColor(.white)
                         }
                     }
+                    .padding(20)
+                    .background(Color.indigo)
+                    .cornerRadius(10)
                 } header: {
                     Text("Instructions")
                         .font(.title)
@@ -47,8 +51,12 @@ struct DetailView: View {
                         ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
                             Text("• " + ingr)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.white)
                         }
                     }
+                    .padding(20)
+                    .background(Color.indigo)
+                    .cornerRadius(10)
                 } header: {
                     Text("Ingredients")
                         .font(.title)
@@ -77,7 +85,7 @@ struct DetailView: View {
                 let dict = (decodedResponse["meals"]?[0])!
                 
                 // Removes leading/trailing whitespace, unecessary newlines, and empty strings
-                recipe.instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "[0-9]\\. ", with: " ", options: .regularExpression).components(separatedBy: ". ")/*.filter({$0 != ""})*/.map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}
+                recipe.instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
                 
                 // Accesses values by ingredient keys, sorting them by their ending number, ignoring invalid values
                 let ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!})
