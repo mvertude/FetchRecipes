@@ -8,12 +8,14 @@
 import SwiftUI
 
 struct Recipe: Codable {
-    var meals: [String: String?] // strInstructions, strIngredient[1:20], strMeasure[1:20]
+    var instructions: String = ""
+    var ingredients: [String] = []
+    var measurements: [String] = []
 }
 
 struct DetailView: View {
     let dessert: Dessert
-    @State private var recipe = Recipe(meals: [:])
+    @State private var recipe = Recipe()
     var body: some View {
         ScrollView {
             VStack {
@@ -26,30 +28,31 @@ struct DetailView: View {
                     ProgressView()
                 }
                 Text(dessert.strMeal)
-                Text((recipe.meals["strInstructions"] ?? "") ?? "")
-                let ingredients = recipe.meals.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).values
-                ForEach(Array(ingredients), id: \.self) { ingredient in
-                    Text(ingredient ?? "")
+                Text(recipe.instructions)
+                ForEach(Array(zip(recipe.ingredients, recipe.measurements)), id: \.0) { item in
+                    HStack {
+                        Text("\(item.0)")
+                        Text(item.1)
+                    }
                 }
             }
         }
         .task {
             await fetch()
-            print(type(of: recipe.meals))
-            print(recipe.meals)
         }
     }
     
     func fetch() async {
-        print("fetching data...")
         guard let url = URL(string: "https://themealdb.com/api/json/v1/1/lookup.php?i=" + dessert.idMeal) else {
             return
         }
-        print(url)
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let decodedResponse = try? JSONDecoder().decode([String:[[String: String?]]].self, from: data) {
-                recipe.meals = (decodedResponse["meals"]?[0])!
+                let dict = (decodedResponse["meals"]?[0])!
+                recipe.instructions = dict["strInstructions"]!!
+                recipe.ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!})
+                recipe.measurements = dict.filter({$0.key.hasPrefix("strMeasure") && $0.value != " " && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(10))! < Int($1.key.dropFirst(10))!}).map({$0.value!})
             }
         } catch {
             print(error)
