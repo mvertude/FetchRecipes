@@ -31,7 +31,7 @@ struct ContentView: View {
                             } placeholder: {
                                 ProgressView()
                             }
-                            .frame(width: 120, height: 120)
+                            .frame(width: 110, height: 110)
                             VStack {
                                 Text(recipe.strMeal)
                                     .frame(maxWidth: .infinity, alignment: .leading)
