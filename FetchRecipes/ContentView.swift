@@ -34,8 +34,12 @@ struct ContentView: View {
                             .frame(width: 120, height: 120)
                             VStack {
                                 Text(recipe.strMeal)
-                                Text(recipe.idMeal)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Text("ID: " + recipe.idMeal)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(Color.gray)
                             }
+                            
                         }
                     }
                 }
