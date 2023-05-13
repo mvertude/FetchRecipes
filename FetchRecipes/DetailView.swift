@@ -26,7 +26,10 @@ struct DetailView: View {
                 } placeholder: {
                     ProgressView()
                 }
-            
+                .padding(20)
+                .shadow(radius: 5)
+                
+                
                 // Displays cooking instructions
                 Section {
                     VStack(alignment: .leading, spacing: 10) {
