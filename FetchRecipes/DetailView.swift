@@ -12,35 +12,57 @@ struct Recipe: Codable {
     var ingredientsAndMeasurements: [String] = []
 }
 
+enum Selection: String, CaseIterable, Identifiable {
+    case ingredients, instructions
+    var id: Self { self }
+}
+
+struct ListView: View {
+    var selection: Selection
+    var data: [String]
+    
+    var body: some View {
+        if selection == .instructions {
+            ForEach(Array(data.enumerated()), id: \.offset) { i, content in
+                Text(String(i + 1) + ". " + content + ((i == data.count - 1) ? "" : "."))
+                    
+            }
+        } else {
+            ForEach(data, id: \.self) { ingr in
+                Text(ingr)
+            }
+        }
+    }
+}
 struct DetailView: View {
     let dessert: Dessert
     @State private var recipe = Recipe()
+    @State private var selectedView: Selection = .ingredients
     var body: some View {
         List {
-            AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .cornerRadius(10)
-            } placeholder: {
-                ProgressView()
+            Group {
+                AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .cornerRadius(10)
+                } placeholder: {
+                    ProgressView()
+                }
+    //            .padding([.horizontal], 20)
+                .shadow(radius: 5)
+                
+                Picker("Ingredients or Instructions", selection: $selectedView) {
+                    ForEach(Selection.allCases) { select in
+                        Text(select.rawValue.capitalized)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
             }
-            .padding([.horizontal], 20)
-            .shadow(radius: 5)
             .listRowBackground(Color(UIColor.systemBackground))
             .listRowSeparator(.hidden)
+            ListView(selection: selectedView, data: (selectedView == .ingredients) ? recipe.ingredientsAndMeasurements: recipe.instructions)
             
-            Section("Instructions") {
-                ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
-                    Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
-                        
-                }
-            }
-            Section("Ingredients") {
-                ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
-                    Text(ingr)
-                }
-            }
         }
         .task {
             await fetch()
@@ -50,81 +72,6 @@ struct DetailView: View {
         .navigationTitle(dessert.strMeal)
         .navigationBarTitleDisplayMode(.inline)
         .offset(y: -30)
-        
-        
-//        List {
-//            ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
-//                Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
-//                    .fixedSize(horizontal: false, vertical: true)
-//                    .foregroundColor(.white)
-//            }
-//        }
-//        .navigationTitle(dessert.strMeal)
-//        .navigationBarTitleDisplayMode(.inline)
-//        .task {
-//            await fetch()
-//        }
-        
-//        ScrollView {
-//            VStack {
-//                AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
-//                    image
-//                        .resizable()
-//                        .scaledToFit()
-//                        .cornerRadius(10)
-//                } placeholder: {
-//                    ProgressView()
-//                }
-//                .padding(20)
-//                .shadow(radius: 5)
-//
-//
-//                // Displays cooking instructions
-//                Section {
-//                    VStack(alignment: .leading, spacing: 10) {
-//                        ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
-//                            Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
-//                                .fixedSize(horizontal: false, vertical: true)
-//                                .foregroundColor(.white)
-//                        }
-//                    }
-//                    .padding(20)
-//                    .background(Color.indigo)
-//                    .cornerRadius(10)
-//                } header: {
-//                    Text("Instructions")
-//                        .font(.title)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                }
-//
-//                // Display ingredients and their measurements
-//                Section {
-//                    VStack(alignment: .leading, spacing: 10) {
-//                        ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
-//                            Text("• " + ingr)
-//                                .frame(maxWidth: .infinity, alignment: .leading)
-//                                .foregroundColor(.white)
-//                        }
-//                    }
-//                    .padding(20)
-//                    .background(Color.indigo)
-//                    .cornerRadius(10)
-//                } header: {
-//                    Text("Ingredients")
-//                        .font(.title)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                        .padding(.top)
-//
-//                }
-//            }
-//            .frame(maxWidth: .infinity, alignment: .leading)
-//            .padding(.horizontal)
-//        }
-//        .navigationTitle(dessert.strMeal)
-//        .navigationBarTitleDisplayMode(.inline)
-//        .task {
-//            await fetch()
-//        }
     }
     
     func fetch() async {
