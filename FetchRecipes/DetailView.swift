@@ -16,66 +16,115 @@ struct DetailView: View {
     let dessert: Dessert
     @State private var recipe = Recipe()
     var body: some View {
-        ScrollView {
-            VStack {
-                AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .cornerRadius(10)
-                } placeholder: {
-                    ProgressView()
-                }
-                .padding(20)
-                .shadow(radius: 5)
-                
-                
-                // Displays cooking instructions
-                Section {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
-                            Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
-                                .fixedSize(horizontal: false, vertical: true)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding(20)
-                    .background(Color.indigo)
+        List {
+            AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
                     .cornerRadius(10)
-                } header: {
-                    Text("Instructions")
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                
-                // Display ingredients and their measurements
-                Section {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
-                            Text("• " + ingr)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding(20)
-                    .background(Color.indigo)
-                    .cornerRadius(10)
-                } header: {
-                    Text("Ingredients")
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top)
+            } placeholder: {
+                ProgressView()
+            }
+            .padding([.horizontal], 20)
+            .shadow(radius: 5)
+            .listRowBackground(Color(UIColor.systemBackground))
+            .listRowSeparator(.hidden)
+            
+            Section("Instructions") {
+                ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
+                    Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
                         
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
+            Section("Ingredients") {
+                ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
+                    Text(ingr)
+                }
+            }
         }
-        .navigationTitle(dessert.strMeal)
-        .navigationBarTitleDisplayMode(.inline)
         .task {
             await fetch()
         }
+        .scrollContentBackground(.hidden)
+        .listStyle(.grouped)
+        .navigationTitle(dessert.strMeal)
+        .navigationBarTitleDisplayMode(.inline)
+        .offset(y: -30)
+        
+        
+//        List {
+//            ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
+//                Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
+//                    .fixedSize(horizontal: false, vertical: true)
+//                    .foregroundColor(.white)
+//            }
+//        }
+//        .navigationTitle(dessert.strMeal)
+//        .navigationBarTitleDisplayMode(.inline)
+//        .task {
+//            await fetch()
+//        }
+        
+//        ScrollView {
+//            VStack {
+//                AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
+//                    image
+//                        .resizable()
+//                        .scaledToFit()
+//                        .cornerRadius(10)
+//                } placeholder: {
+//                    ProgressView()
+//                }
+//                .padding(20)
+//                .shadow(radius: 5)
+//
+//
+//                // Displays cooking instructions
+//                Section {
+//                    VStack(alignment: .leading, spacing: 10) {
+//                        ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
+//                            Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
+//                                .fixedSize(horizontal: false, vertical: true)
+//                                .foregroundColor(.white)
+//                        }
+//                    }
+//                    .padding(20)
+//                    .background(Color.indigo)
+//                    .cornerRadius(10)
+//                } header: {
+//                    Text("Instructions")
+//                        .font(.title)
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                }
+//
+//                // Display ingredients and their measurements
+//                Section {
+//                    VStack(alignment: .leading, spacing: 10) {
+//                        ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
+//                            Text("• " + ingr)
+//                                .frame(maxWidth: .infinity, alignment: .leading)
+//                                .foregroundColor(.white)
+//                        }
+//                    }
+//                    .padding(20)
+//                    .background(Color.indigo)
+//                    .cornerRadius(10)
+//                } header: {
+//                    Text("Ingredients")
+//                        .font(.title)
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                        .padding(.top)
+//
+//                }
+//            }
+//            .frame(maxWidth: .infinity, alignment: .leading)
+//            .padding(.horizontal)
+//        }
+//        .navigationTitle(dessert.strMeal)
+//        .navigationBarTitleDisplayMode(.inline)
+//        .task {
+//            await fetch()
+//        }
     }
     
     func fetch() async {

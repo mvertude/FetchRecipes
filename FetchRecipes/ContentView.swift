@@ -39,6 +39,7 @@ struct ContentView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(Color.gray)
                             }
+                            .padding(.leading, 10)
                             
                         }
                     }
