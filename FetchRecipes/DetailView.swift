@@ -12,98 +12,102 @@ struct Recipe: Codable {
     var ingredientsAndMeasurements: [String] = []
 }
 
+enum Selection: String, CaseIterable, Identifiable {
+    case ingredients, instructions
+    var id: Self { self }
+}
+
+struct ListView: View {
+    var selection: Selection
+    var data: [String]
+    
+    var body: some View {
+        if selection == .instructions {
+            ForEach(Array(data.enumerated()), id: \.offset) { i, content in
+                Text(String(i + 1) + ". " + content + ((i == data.count - 1) ? "" : "."))
+                    
+            }
+        } else {
+            ForEach(data, id: \.self) { ingr in
+                Text(ingr)
+            }
+        }
+    }
+}
+
 struct DetailView: View {
     let dessert: Dessert
     @State private var recipe = Recipe()
+    @State private var selectedView: Selection = .ingredients
     var body: some View {
-        ScrollView {
-            VStack {
+        List {
+            Group {
                 AsyncImage(url: URL(string: dessert.strMealThumb)) { image in
                     image
                         .resizable()
-                        .scaledToFit()
+                        .aspectRatio(contentMode: .fill)
                         .cornerRadius(10)
                 } placeholder: {
                     ProgressView()
                 }
-                .padding(20)
                 .shadow(radius: 5)
                 
-                
-                // Displays cooking instructions
-                Section {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { i, content in
-                            Text(String(i + 1) + ". " + content + ((i == recipe.instructions.count - 1) ? "" : "."))
-                                .fixedSize(horizontal: false, vertical: true)
-                                .foregroundColor(.white)
-                        }
+                Picker("Ingredients or Instructions", selection: $selectedView) {
+                    ForEach(Selection.allCases) { select in
+                        Text(select.rawValue.capitalized)
                     }
-                    .padding(20)
-                    .background(Color.indigo)
-                    .cornerRadius(10)
-                } header: {
-                    Text("Instructions")
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                
-                // Display ingredients and their measurements
-                Section {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(recipe.ingredientsAndMeasurements, id: \.self) { ingr in
-                            Text("• " + ingr)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding(20)
-                    .background(Color.indigo)
-                    .cornerRadius(10)
-                } header: {
-                    Text("Ingredients")
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top)
-                        
-                }
+                .pickerStyle(SegmentedPickerStyle())
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
+            .listRowBackground(Color(UIColor.systemBackground))
+            .listRowSeparator(.hidden)
+            ListView(selection: selectedView, data: (selectedView == .ingredients) ? recipe.ingredientsAndMeasurements: recipe.instructions)
+            
         }
+        .task {
+            await recipe = fetchDetails(id: dessert.idMeal)
+        }
+        .scrollContentBackground(.hidden)
+        .listStyle(.grouped)
         .navigationTitle(dessert.strMeal)
         .navigationBarTitleDisplayMode(.inline)
-        .task {
-            await fetch()
-        }
+        .offset(y: -30)
     }
     
-    func fetch() async {
-        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/lookup.php?i=" + dessert.idMeal) else {
-            return
+    func fetchDetails(id: String) async -> Recipe {
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/lookup.php?i=" + id) else {
+            return Recipe()
         }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let decodedResponse = try? JSONDecoder().decode([String:[[String: String?]]].self, from: data) {
                 let dict = (decodedResponse["meals"]?[0])!
                 
-                // Removes leading/trailing whitespace, unecessary newlines, and empty strings
-                recipe.instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
+                // Removes leading/trailing whitespace, unecessary newlines, and empty strings from instrs
+                let instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
                 
-                // Accesses values by ingredient keys, sorting them by their ending number, ignoring invalid values
-                let ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!})
+                // Accesses the ingredients and their corresponding measurements
+                let ingredients: [String] = filterIngredients(dict: dict, prefix: "strIngredient")
+                let measurements: [String] = filterIngredients(dict: dict, prefix: "strMeasure")
                 
-                // Accesses values by measurement keys, sorting them by their ending number, ignoring invalid values
-                let measurements = dict.filter({$0.key.hasPrefix("strMeasure") && $0.value != " " && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(10))! < Int($1.key.dropFirst(10))!}).map({$0.value!})
-                
-                // Adds ingredients and measurements together into a single string
-                for i in 0..<ingredients.count {
-                    recipe.ingredientsAndMeasurements.append(measurements[i].trimmingCharacters(in: .whitespaces) + " " + ingredients[i].trimmingCharacters(in: .whitespaces))
+                // Concatenates ingredients and measurements together into a single string
+                var ingredientsAndMeasurements: [String] = []
+                for (ingredient, measurement) in zip(ingredients, measurements) {
+                    ingredientsAndMeasurements.append(measurement + " " + ingredient)
                 }
+                
+                return Recipe(instructions: instructions, ingredientsAndMeasurements: ingredientsAndMeasurements)
             }
         } catch {
             print(error)
         }
+        return Recipe()
+    }
+    
+    // Helper function to filter out valid ingredients, removing empty/null values and whitespace
+    func filterIngredients(dict: [String: String?], prefix: String) -> [String] {
+        return dict.filter({$0.key.hasPrefix(prefix) && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(prefix.count))! < Int($1.key.dropFirst(prefix.count))!}).map({$0.value!.trimmingCharacters(in: .whitespaces)})
+        
     }
 }
 

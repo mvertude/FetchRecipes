@@ -39,7 +39,7 @@ struct ContentView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(Color.gray)
                             }
-                            
+                            .padding(.leading, 10)
                         }
                     }
                 }
@@ -47,22 +47,24 @@ struct ContentView: View {
             .navigationTitle("Desserts")
         }
         .task {
-            await fetch()
+            await recipes = fetch()
         }
     }
     
-    func fetch() async {
+    func fetch() async -> [Dessert] {
         guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else {
-            return
+            return []
         }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let decodedResponse = try? JSONDecoder().decode([String: [Dessert]].self, from: data) {
-                recipes = decodedResponse["meals"]!
+//                recipes = decodedResponse["meals"]!
+                return decodedResponse["meals"]!
             }
         } catch {
             print(error)
         }
+        return []
     }
 }
 
