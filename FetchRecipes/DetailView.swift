@@ -34,6 +34,7 @@ struct ListView: View {
         }
     }
 }
+
 struct DetailView: View {
     let dessert: Dessert
     @State private var recipe = Recipe()
@@ -49,7 +50,6 @@ struct DetailView: View {
                 } placeholder: {
                     ProgressView()
                 }
-    //            .padding([.horizontal], 20)
                 .shadow(radius: 5)
                 
                 Picker("Ingredients or Instructions", selection: $selectedView) {
@@ -65,7 +65,7 @@ struct DetailView: View {
             
         }
         .task {
-            await fetch()
+            await fetchDetails(id: dessert.idMeal)
         }
         .scrollContentBackground(.hidden)
         .listStyle(.grouped)
@@ -74,8 +74,8 @@ struct DetailView: View {
         .offset(y: -30)
     }
     
-    func fetch() async {
-        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/lookup.php?i=" + dessert.idMeal) else {
+    func fetchDetails(id: String) async {
+        guard let url = URL(string: "https://themealdb.com/api/json/v1/1/lookup.php?i=" + id) else {
             return
         }
         do {
@@ -87,15 +87,18 @@ struct DetailView: View {
                 recipe.instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
                 
                 // Accesses values by ingredient keys, sorting them by their ending number, ignoring invalid values
-                let ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!})
+                let ingredients = dict.filter({$0.key.hasPrefix("strIngredient") && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(13))! < Int($1.key.dropFirst(13))!}).map({$0.value!.trimmingCharacters(in: .whitespaces)})
                 
                 // Accesses values by measurement keys, sorting them by their ending number, ignoring invalid values
-                let measurements = dict.filter({$0.key.hasPrefix("strMeasure") && $0.value != " " && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(10))! < Int($1.key.dropFirst(10))!}).map({$0.value!})
+                let measurements = dict.filter({$0.key.hasPrefix("strMeasure") && $0.value != " " && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(10))! < Int($1.key.dropFirst(10))!}).map({$0.value!.trimmingCharacters(in: .whitespaces)})
                 
                 // Adds ingredients and measurements together into a single string
                 for i in 0..<ingredients.count {
-                    recipe.ingredientsAndMeasurements.append(measurements[i].trimmingCharacters(in: .whitespaces) + " " + ingredients[i].trimmingCharacters(in: .whitespaces))
+                    recipe.ingredientsAndMeasurements.append(measurements[i] + " " + ingredients[i])
                 }
+//                for i in 0..<ingredients.count {
+//                    recipe.ingredientsAndMeasurements.append(measurements[i].trimmingCharacters(in: .whitespaces) + " " + ingredients[i].trimmingCharacters(in: .whitespaces))
+//                }
             }
         } catch {
             print(error)
