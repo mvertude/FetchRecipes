@@ -58,7 +58,6 @@ struct ContentView: View {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let decodedResponse = try? JSONDecoder().decode([String: [Dessert]].self, from: data) {
-//                recipes = decodedResponse["meals"]!
                 return decodedResponse["meals"]!
             }
         } catch {

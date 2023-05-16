@@ -83,8 +83,8 @@ struct DetailView: View {
             if let decodedResponse = try? JSONDecoder().decode([String:[[String: String?]]].self, from: data) {
                 let dict = (decodedResponse["meals"]?[0])!
                 
-                // Removes leading/trailing whitespace, unecessary newlines, and empty strings from instrs
-                let instructions = dict["strInstructions"]!!.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
+                // Separates instructions into a list of strings
+                let instructions = stripInstructions(str: dict["strInstructions"]!!)
                 
                 // Accesses the ingredients and their corresponding measurements
                 let ingredients: [String] = filterIngredients(dict: dict, prefix: "strIngredient")
@@ -104,10 +104,14 @@ struct DetailView: View {
         return Recipe()
     }
     
+    // Removes leading/trailing whitespace, unecessary newlines, and empty strings from instrs
+    func stripInstructions(str: String) -> [String] {
+        return str.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
+    }
+    
     // Helper function to filter out valid ingredients, removing empty/null values and whitespace
     func filterIngredients(dict: [String: String?], prefix: String) -> [String] {
         return dict.filter({$0.key.hasPrefix(prefix) && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(prefix.count))! < Int($1.key.dropFirst(prefix.count))!}).map({$0.value!.trimmingCharacters(in: .whitespaces)})
-        
     }
 }
 
