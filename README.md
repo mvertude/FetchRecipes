@@ -19,4 +19,4 @@ FetchRecipes is an iOS application built with Swift and SwiftUI. When first open
 2. Press `Cmd + R` to begin the simulation.
 
 ## Running the tests
-There are some unit tests in place to ensure that data is being properly fetched from the API then altered accordingly for proper display in the views. You may press `Cmd + U` to run these tests. 
+There are some unit tests in place to ensure that data is being properly fetched from the API then altered accordingly for display in the views. You may press `Cmd + U` to run these tests. 
