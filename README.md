@@ -10,7 +10,7 @@ FetchRecipes is an iOS application built with Swift and SwiftUI. When first open
 * Xcode 14.3 and above
 
 ### Installation
-1. Clone the project onto your local machine using `git clone https://github.com/mvertude/FetchRecipes.git` in your terminal to your desired directory. Alternatively, you may download the project zip file then extract it onto your computer at your chosen location.
+1. Clone the project onto your local machine using `git clone https://github.com/mvertude/FetchRecipes.git` in your terminal at your desired directory. Alternatively, you may download the project zip file then extract it onto your computer at your chosen location.
 2. Start up Xcode then open the project file by navigating to the Menu Bar > File > Open... > FetchRecipes location.
 3. On a fresh install, there should currently be "No Scheme" at the top of your Xcode project window. Click on that text, then click on "New Scheme...". A popup window should come up where you can leave all the values as default, then click "OK".
 
