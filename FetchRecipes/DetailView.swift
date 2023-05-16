@@ -91,11 +91,13 @@ struct DetailView: View {
                 let measurements: [String] = filterIngredients(dict: dict, prefix: "strMeasure")
                 
                 // Concatenates ingredients and measurements together into a single string
+                if ingredients.count != measurements.count {
+                    return Recipe()
+                }
                 var ingredientsAndMeasurements: [String] = []
                 for (ingredient, measurement) in zip(ingredients, measurements) {
                     ingredientsAndMeasurements.append(measurement + " " + ingredient)
                 }
-                
                 return Recipe(instructions: instructions, ingredientsAndMeasurements: ingredientsAndMeasurements)
             }
         } catch {
@@ -111,7 +113,7 @@ struct DetailView: View {
     
     // Helper function to filter out valid ingredients, removing empty/null values and whitespace
     func filterIngredients(dict: [String: String?], prefix: String) -> [String] {
-        return dict.filter({$0.key.hasPrefix(prefix) && $0.value != "" && $0.value != nil}).sorted(by: { Int($0.key.dropFirst(prefix.count))! < Int($1.key.dropFirst(prefix.count))!}).map({$0.value!.trimmingCharacters(in: .whitespaces)})
+        return dict.filter({$0.key.hasPrefix(prefix) && $0.value != "" && $0.value != nil && $0.value != " "}).sorted(by: { Int($0.key.dropFirst(prefix.count))! < Int($1.key.dropFirst(prefix.count))!}).map({$0.value!.trimmingCharacters(in: .whitespaces)})
     }
 }
 

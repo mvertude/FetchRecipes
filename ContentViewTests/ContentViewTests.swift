@@ -459,10 +459,12 @@ final class ContentViewTests: XCTestCase {
     }
     
     // None of the hard-coded JSON dessert values throw an error when accessed
-    func test_DetailView_jsonValuesNoError() {
+    func test_fetchDetails_nonEmptyRecipe() async {
         for value in dict.values {
             let sutTwo = DetailView(dessert: value)
-            XCTAssertNoThrow(sutTwo)
+            let actual = await sutTwo.fetchDetails(id: value.idMeal)
+            XCTAssertTrue(actual.ingredientsAndMeasurements.count > 0)
+            XCTAssertTrue(actual.instructions.count > 0)
         }
     }
     
@@ -473,6 +475,4 @@ final class ContentViewTests: XCTestCase {
         XCTAssertEqual(actual.ingredientsAndMeasurements, Recipe().ingredientsAndMeasurements)
         XCTAssertEqual(actual.instructions, Recipe().instructions)
     }
-    
-    
 }
