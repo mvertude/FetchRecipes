@@ -475,4 +475,13 @@ final class ContentViewTests: XCTestCase {
         XCTAssertEqual(actual.ingredientsAndMeasurements, Recipe().ingredientsAndMeasurements)
         XCTAssertEqual(actual.instructions, Recipe().instructions)
     }
+    
+    // final instruction in array ends with some punctuation
+    func test_fetchDetails_instructionEndsWithPeriod() async {
+        for value in dict.values {
+            let sutTwo = DetailView(dessert: value)
+            let actual = await sutTwo.fetchDetails(id: value.idMeal)
+            XCTAssertTrue(actual.instructions.last!.hasSuffix(".") || actual.instructions.last!.hasSuffix("!"), value.strMeal)
+        }
+    }
 }

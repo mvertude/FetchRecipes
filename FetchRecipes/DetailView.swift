@@ -84,8 +84,12 @@ struct DetailView: View {
                 let dict = (decodedResponse["meals"]?[0])!
                 
                 // Separates instructions into a list of strings
-                let instructions = stripInstructions(str: dict["strInstructions"]!!)
+                var instructions = stripInstructions(str: dict["strInstructions"]!!)
                 
+                // Ensures that the last instruction ends with a period
+                if !instructions[instructions.count - 1].hasSuffix(".") && !instructions[instructions.count - 1].hasSuffix("!") {
+                    instructions[instructions.count - 1] += "."
+                }
                 // Accesses the ingredients and their corresponding measurements
                 let ingredients: [String] = filterIngredients(dict: dict, prefix: "strIngredient")
                 let measurements: [String] = filterIngredients(dict: dict, prefix: "strMeasure")
@@ -94,6 +98,7 @@ struct DetailView: View {
                 if ingredients.count != measurements.count {
                     return Recipe()
                 }
+                
                 var ingredientsAndMeasurements: [String] = []
                 for (ingredient, measurement) in zip(ingredients, measurements) {
                     ingredientsAndMeasurements.append(measurement + " " + ingredient)
@@ -108,7 +113,7 @@ struct DetailView: View {
     
     // Removes leading/trailing whitespace, unecessary newlines, and empty strings from instrs
     func stripInstructions(str: String) -> [String] {
-        return str.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
+        return str.replacingOccurrences(of: "\r\n", with: " ").replacingOccurrences(of: "\\w*(?<![Gg]as )[0-9]\\. ", with: ". ", options: .regularExpression).replacingOccurrences(of: "STEP [0-9] ", with: ". ", options: .regularExpression).components(separatedBy: ". ").map{$0.trimmingCharacters(in: .whitespacesAndNewlines)}.filter({$0 != ""})
     }
     
     // Helper function to filter out valid ingredients, removing empty/null values and whitespace
