@@ -23,6 +23,7 @@ struct ListView: View {
     
     var body: some View {
         if selection == .instructions {
+            // Creates a numbered list from the instructions array
             ForEach(Array(data.enumerated()), id: \.offset) { i, content in
                 Text(String(i + 1) + ". " + content + ((i == data.count - 1) ? "" : "."))
                     
@@ -74,6 +75,7 @@ struct DetailView: View {
         .offset(y: -30)
     }
     
+    // Fetches the meal details from TheMealDB
     func fetchDetails(id: String) async -> Recipe {
         guard let url = URL(string: "https://themealdb.com/api/json/v1/1/lookup.php?i=" + id) else {
             return Recipe()
@@ -94,11 +96,12 @@ struct DetailView: View {
                 let ingredients: [String] = filterIngredients(dict: dict, prefix: "strIngredient")
                 let measurements: [String] = filterIngredients(dict: dict, prefix: "strMeasure")
                 
-                // Concatenates ingredients and measurements together into a single string
+                // Each ingredient should have an associated measurement, else there's an error
                 if ingredients.count != measurements.count {
                     return Recipe()
                 }
                 
+                // Concatenates ingredients and measurements together into a single string
                 var ingredientsAndMeasurements: [String] = []
                 for (ingredient, measurement) in zip(ingredients, measurements) {
                     ingredientsAndMeasurements.append(measurement + " " + ingredient)

@@ -484,4 +484,16 @@ final class ContentViewTests: XCTestCase {
             XCTAssertTrue(actual.instructions.last!.hasSuffix(".") || actual.instructions.last!.hasSuffix("!"), value.strMeal)
         }
     }
+    
+    /*
+     * Battenberg Cake, Chocolate Souffle, and Sticky Toffee Pudding contain repeating ingredients,
+     * but TheMealDB displays these duplicates on their website, so we will do the same 
+    func test_fetchDetails_noDuplicateIngredients() async {
+        for value in dict.values {
+            let sutTwo = DetailView(dessert: value)
+            let actual = await sutTwo.fetchDetails(id: value.idMeal)
+            XCTAssertTrue(Set(actual.ingredientsAndMeasurements).count == actual.ingredientsAndMeasurements.count, value.strMeal)
+        }
+    }
+     */
 }

@@ -18,6 +18,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             List {
+                // Displays meals in alphabetic order
                 ForEach(recipes.sorted(by: { $0.strMeal < $1.strMeal}) , id: \.self) { recipe in
                     NavigationLink {
                         DetailView(dessert: recipe)
@@ -35,9 +36,6 @@ struct ContentView: View {
                             VStack {
                                 Text(recipe.strMeal)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                Text("ID: " + recipe.idMeal)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(Color.gray)
                             }
                             .padding(.leading, 10)
                         }
@@ -51,6 +49,7 @@ struct ContentView: View {
         }
     }
     
+    // Fetches all dessert values from TheMealDB API
     func fetch() async -> [Dessert] {
         guard let url = URL(string: "https://themealdb.com/api/json/v1/1/filter.php?c=Dessert") else {
             return []
